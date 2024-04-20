@@ -1,7 +1,17 @@
 import random
 import string
 
+
 def generate_booking_reference(booked_references):
+    """
+        Generate a random booking reference.
+
+        Parameters:
+        - booked_references: List of already booked references
+
+        Returns:
+        - Unique booking reference (string)
+        """
     # Define characters for alphanumeric string
     characters = string.ascii_letters + string.digits
 
