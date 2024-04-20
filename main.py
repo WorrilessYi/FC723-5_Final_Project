@@ -30,7 +30,7 @@ class SeatBookingSystem:
         check = self.check_seat(answer)
         if answer not in self.checked:
             self.checked.append(answer)
-        elif check == "F":
+        if check == "F":
             print(f"The seat {answer} is available")
         elif check == "invalid":
             print("Invalid input for seat number. Please enter a valid seat number (e.g., A1).")
@@ -38,19 +38,24 @@ class SeatBookingSystem:
             print(f"Sorry, the seat {answer} is not available")
 
     def check_seat(self, seat_num):
-        first, second = None, 0
-        seat = list(seat_num)
-        if len(seat) == 2:
-            if seat[0].isalpha() and seat[1].isdigit():
-                first = seat[0].upper()
-                second = int(seat[1])
-        elif len(seat) == 3:
-            if seat[0].isalpha() and seat[1].isdigit() and seat[2].isdigit():
-                first = seat[0].upper()
-                second = int(seat[1]+seat[2])
-        if first in self.data.keys() and 1 <= second <= 80:
+        if self.display_seat(seat_num):
+            first, second = self.display_seat(seat_num)
             return self.data[first][second-1]
         return "invalid"
+
+    def display_seat(self, seat_num):
+        seat = list(seat_num)
+        letter, number = None, 0
+        if len(seat) == 2:
+            if seat[0].isalpha() and seat[1].isdigit():
+                letter = seat[0].upper()
+                number = int(seat[1])
+        elif len(seat) == 3:
+            if seat[0].isalpha() and seat[1].isdigit() and seat[2].isdigit():
+                letter = seat[0].upper()
+                number = int(seat[1] + seat[2])
+        if letter in self.data.keys() and 1 <= number <= 80:
+            return letter, number
 
     def choice2(self):
         answer = input("Enter a seat number to book (e.g. A9): ")
@@ -65,33 +70,22 @@ class SeatBookingSystem:
     def book_seat(self, seat_num):
         if seat_num in self.booked:
             return "Seat already booked"
-        seat = list(seat_num)
-        letter, number = None, 0
-        if len(seat) == 2:
-            if seat[0].isalpha() and seat[1].isdigit():
-                letter = seat[0].upper()
-                number = int(seat[1])
-        elif len(seat) == 3:
-            if seat[0].isalpha() and seat[1].isdigit() and seat[2].isdigit():
-                letter = seat[0].upper()
-                number = int(seat[1] + seat[2])
-        if letter in self.data.keys() and 1 <= number <= 80:
-            if self.data[letter][number-1] == 'F':
-                booking_reference = generate_booking_reference(self.booked)
-                self.data[letter][number-1] = booking_reference
-                # Store booking reference and customer data
-                self.booked[seat_num] = {
-                    "reference": booking_reference,
-                    "passport_number": input("Enter passenger's passport number: "),
-                    "first_name": input("Enter passenger's first name: "),
-                    "last_name": input("Enter passenger's last name: "),
-                    "row": number,
-                    "column": letter
-                }
-                return f"Seat {seat_num} booked successfully. Reference: {booking_reference}"
-            else:
-                return f"Seat {seat_num} is not available for booking"
-        return "Invalid input for seat number. Please enter a valid seat number (e.g., A1)."
+        letter, number = self.display_seat(seat_num)
+        if self.data[letter][number-1] == 'F':
+            booking_reference = generate_booking_reference(self.booked)
+            self.data[letter][number-1] = booking_reference
+            # Store booking reference and customer data
+            self.booked[seat_num] = {
+                "reference": booking_reference,
+                "passport_number": input("Enter passenger's passport number: "),
+                "first_name": input("Enter passenger's first name: "),
+                "last_name": input("Enter passenger's last name: "),
+                "row": number,
+                "column": letter
+            }
+            return f"Seat {seat_num} booked successfully. Reference: {booking_reference}"
+        else:
+            return f"Seat {seat_num} is not available for booking"
 
     def choice3(self):
         answer = input("Enter a seat number to cancel (e.g. A9): ")
@@ -107,20 +101,9 @@ class SeatBookingSystem:
     def free_seat(self, seat_num):
         if seat_num in self.booked:
             del self.booked[seat_num]  # Remove booking details
-        seat = list(seat_num)
-        letter, number = None, 0
-        if len(seat) == 2:
-            if seat[0].isalpha() and seat[1].isdigit():
-                letter = seat[0].upper()
-                number = int(seat[1])
-        elif len(seat) == 3:
-            if seat[0].isalpha() and seat[1].isdigit() and seat[2].isdigit():
-                letter = seat[0].upper()
-                number = int(seat[1] + seat[2])
-        if letter in self.data.keys() and 1 <= number <= 80:
-            self.data[letter][number-1] = 'F'
-            return f"Seat {seat_num} cancelled successfully"
-        return "Invalid input for seat number. Please enter a valid seat number (e.g., A1)."
+        letter, number = self.display_seat(seat_num)
+        self.data[letter][number-1] = 'F'
+        return f"Seat {seat_num} cancelled successfully"
 
     def show_booking_state(self):
         df = pd.DataFrame(self.data)  # Dataframing it so
@@ -152,10 +135,10 @@ class SeatBookingSystem:
             elif choice == '4':
                 self.show_booking_state()
             elif choice == '5':
-                print("Thank you for choosing Apache airlines✈️")
+                print("Thank you for choosing Apache airlines...✈️")
                 break
             else:
-                print("Invalid choice. Please select again.")
+                print("Invalid choice. Please select from 1 to 5.")
 
 
 if __name__ == "__main__":
