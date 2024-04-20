@@ -48,10 +48,11 @@ class SeatBookingSystem:
         Returns:
         - Status of the seat (Free, Storage, Aisle, or Reference number)
         """
-        if self.display_seat(seat_num):
-            first, second = self.display_seat(seat_num)
-            return self.data[first][second-1]
-        return "invalid"
+        if self.display_seat(seat_num):  # checking whether the input is legitimate
+            letter, number = self.display_seat(seat_num)  # separating letter and number
+            return self.data[letter][number-1]  # return the status
+        else:
+            return "invalid"  # input layout was wrong or out of range
 
     def display_seat(self, seat_num):
         """
@@ -70,7 +71,7 @@ class SeatBookingSystem:
             if seat[0].isalpha() and seat[1].isdigit() and seat[2].isdigit():
                 letter = seat[0].upper()
                 number = int(seat[1] + seat[2])  # merging 2 digit number
-        if letter in self.data.keys() and 1 <= number <= 80:
+        if letter in self.data.keys() and 1 <= number <= 80:  # making sure letter is in column and number in range
             return letter, number
 
     def choice2(self):
@@ -96,7 +97,6 @@ class SeatBookingSystem:
         if self.data[letter][number-1] == 'F':
             # Generate booking reference
             booking_reference = generate_booking_reference(list(self.booked.values()))
-            print(list(self.booked.values()))
             self.data[letter][number-1] = booking_reference
             # Store booking reference and customer data
             self.booked[seat_num] = {
@@ -118,7 +118,7 @@ class SeatBookingSystem:
             print(f"Sorry the seat {answer} is not booked and can't be cancelled")
         elif check == "invalid":
             print("Invalid input for seat number. Please enter a valid seat number (e.g., A1).")
-        else:
+        else:  # if not free, storage, aisle, or invalid must be booking reference
             print(self.free_seat(answer))
             self.cancelled.append(answer)
 
@@ -145,9 +145,10 @@ class SeatBookingSystem:
         # Create DataFrame to display the seating arrangement
         df = pd.DataFrame(self.data)
         df.index = df.index + 1
+        pd.set_option('display.max_columns', None)
         print(df.transpose())  # Transpose DataFrame to display seats in columns
         # Print total seats, booked seats, cancelled seats, available seats, and checked seats
-        print(f"Total seats: {self.total_seats}")
+        print(f"\nTotal seats: {self.total_seats}")
         print(f"Booked seats: {len(self.booked)}")
         print(f"Cancelled seats: {len(self.cancelled)}")
         print(f"Available seats: {self.total_seats - len(self.booked)}")
@@ -175,7 +176,7 @@ class SeatBookingSystem:
             elif choice == '4':
                 self.show_booking_state()
             elif choice == '5':
-                print("Thank you for choosing Apache airlines...✈️")
+                print("\nThank you for choosing Apache airlines...✈️")
                 break
             else:
                 print("Invalid choice. Please select from 1 to 5.")
